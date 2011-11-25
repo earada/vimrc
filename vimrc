@@ -50,12 +50,12 @@ endif
 
 " Syntax highlight
 " Datsi
-au BufNewfile,bufRead *.str set filetype=str
-au BufNewfile,bufRead *.ens set filetype=ens
+au BufNewfile,bufRead *.ens setf ens
 
 " Vala, Gtkaml and Gtkon
-au BufNewFile,BufRead *.vala setf cs
-au BufNewFile,BufRead *.vapi setf cs
+" Syntax files from http://code.google.com/p/gtkaml/
+au BufNewFile,BufRead *.vala setf vala
+au BufNewFile,BufRead *.vapi setf vala
 au BufNewFile,BufRead *.gtkaml setf xml
 au BufNewFile,BufRead *.gtkon setf gtkon
 
