@@ -18,8 +18,8 @@ set scrolloff=5
 
 
 " Spanish lang and disabled by default
-setlocal spell spelllang=es
-set nospell
+"setlocal spell spelllang=es
+"set nospell
 
 " Map arrows in some distros
 set whichwrap+=[,],<,>
@@ -51,6 +51,7 @@ endif
 " Syntax highlight
 " Datsi
 au BufNewfile,bufRead *.ens setf ens
+au BufNewfile,bufRead *.yar setf yar
 
 " Vala, Gtkaml and Gtkon
 " Syntax files from http://code.google.com/p/gtkaml/

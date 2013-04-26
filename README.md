@@ -3,8 +3,9 @@ VIMRC
 
 Description
 ----------
-This repository contains my personal vimrc configuration and a syntax file that
-I used to use when coding 81100 assembler.
+This repository contains my personal vimrc configuration and a some syntax files that I used to use:
+ * ens.vim 81100 assembler syntax file.
+ * yar.vim syntax highlighter for yara rules.
 
 Install
 -------
@@ -13,3 +14,4 @@ files update with a simple 'git pull'.
 
 	ln -s ~/vimrc/vimrc ~/.vimrc
 	ln -s ~/vimrc/ens.vim /usr/share/vim/vim73/syntax/ens.vim
+	ln -s ~/vimrc/ens.vim /usr/share/vim/vim73/syntax/yar.vim
