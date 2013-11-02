@@ -101,7 +101,7 @@ map _B :bp<CR>
 ""Ctags""
 """""""""
 set tags+=/usr/src/linux/tags
-set tags+=~/.vim/tags/radare2_tags
+set tags+=$HOME/.vim/tags/radare2_tags
 
 """"""""""""""""""
 ""Mercurial Diff""
