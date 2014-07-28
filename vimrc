@@ -11,6 +11,8 @@ set nu nocompatible wrap showmode showcmd showmatch ruler laststatus=2 incsearch
 
 " Tabs
 set autoindent ts=4 sts=4 sw=4 noexpandtab
+" Use expandtab just with python
+autocmd BufNewFile,BufRead *.py set expandtab
 " set listchars=tab:▸\ ,eol:¬
 
 " Scroll limit
@@ -133,6 +135,11 @@ function! Code_C()
 endfunction
 function! Code_Perl()
 	call append(0,"#!/usr/bin/perl -w")
+	call cursor(line('$'),0)
+endfunction
+function! Code_Python()
+	call append(0,"#!/usr/bin/env python")
+	call append('$',"# -*- coding: utf-8 -*-")
 	call cursor(line('$'),0)
 endfunction
 
