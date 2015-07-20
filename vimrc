@@ -139,7 +139,8 @@ function! Code_Perl()
 endfunction
 function! Code_Python()
 	call append(0,"#!/usr/bin/env python")
-	call append('$',"# -*- coding: utf-8 -*-")
+	call append('1',"# -*- coding: utf-8 -*-")
+	call append('$',["if __name__ == \"__main__\":"])
 	call cursor(line('$'),0)
 endfunction
 
