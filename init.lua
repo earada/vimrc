@@ -11,7 +11,7 @@ vim.opt.relativenumber = true           -- Show the numbers relatives to the cur
 vim.opt.scrolloff = 5                   -- Show 5 lines off while scrolling
 vim.opt.sidescrolloff = 5               -- Show 5 columns off  while side-scrolling
 vim.opt.lazyredraw = true               -- Do not redraw screen in the middle of a macro
-vim.opt.clipboard = 'unnamed'           -- System's clipboard
+-- vim.opt.clipboard = 'unnamed'           -- System's clipboard
 vim.opt.tabstop = 4                     -- A tab is 4 spaces
 vim.opt.softtabstop = 4                 -- Also softabs
 vim.opt.shiftwidth = 4                  -- 4 spaces on indenting
@@ -38,9 +38,10 @@ au TermOpen * tnoremap <Esc> <c-\><c-n>
 au BufEnter * if &buftype == 'terminal' | :startinsert | endif
 ]]
 
--- Disable providers
+-- Disable providers and enable custom python
 vim.g.loaded_python_provider = 0        -- Disable python2 support
 vim.g.loaded_perl_provider = 0          -- Disable perl support
+vim.g.python3_host_prog = '~/.pyenv/versions/neovim/bin/python'
 
 
 -- My mappings
@@ -49,6 +50,9 @@ vim.api.nvim_set_keymap('n', 'Y', 'yy', { noremap = false })  -- Vim default beh
 vim.api.nvim_set_keymap('n', '<leader>w', '<cmd>w<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<leader>q', '<cmd>q<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<F6>', '<cmd>set list!<Bar>set list?<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<F7>', '<cmd>lua vim.lsp.diagnostic.enable()<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<F8>', '<cmd>lua vim.lsp.diagnostic.disable()<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<F9>', '<cmd>!~/.pyenv/versions/neovim/bin/black %<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<leader>h', '<cmd>nohlsearch<CR>', { noremap = true })
 
 -- Move lines up/down with Ctrl+[jk]
@@ -77,6 +81,8 @@ require('telescope').setup{
   defaults = {
     mappings = {
       i = {
+        ["<C-k>"] = "move_selection_previous",
+        ["<C-j>"] = "move_selection_next",
         ["<C-h>"] = "which_key"
       }
     }
@@ -85,11 +91,15 @@ require('telescope').setup{
   extensions = {}
 }
 require('telescope').load_extension('fzy_native')
-vim.api.nvim_set_keymap('n', '<Space>ff', [[<cmd>lua require('telescope.builtin').find_files()<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Space>fg', [[<cmd>lua require('telescope.builtin').live_grep()<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Space>fs', [[<cmd>lua require('telescope.builtin').grep_string()<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Space>fb', [[<cmd>lua require('telescope.builtin').buffers()<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Space>fh', [[<cmd>lua require('telescope.builtin').help_tags()<cr>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>ff', [[<cmd>lua require('telescope.builtin').find_files()<cr>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>fg', [[<cmd>lua require('telescope.builtin').live_grep()<cr>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>fs', [[<cmd>lua require('telescope.builtin').grep_string()<cr>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>fb', [[<cmd>lua require('telescope.builtin').buffers()<cr>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>fh', [[<cmd>lua require('telescope.builtin').help_tags()<cr>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>gl', [[<cmd>lua require('telescope.builtin').git_commits()<cr>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>gr', [[<cmd>lua require('telescope.builtin').git_bcommits()<cr>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>gc', [[<cmd>lua require('telescope.builtin').git_branches()<cr>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>gB', [[<cmd>lua require('telescope.builtin').help_tags()<cr>]], { noremap = true, silent = true })
 
 -- LspConfig
 local nvim_lsp = require('lspconfig')
