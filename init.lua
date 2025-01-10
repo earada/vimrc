@@ -20,8 +20,10 @@ vim.opt.autoindent = true               -- Always indent
 vim.opt.textwidth = 88                  -- Width of 88 chars per line
 vim.opt.listchars = { eol = '$' }       -- Show $ as end of line in list mode
 vim.opt.formatoptions:append('cqron1')  -- How automatic formating is done
+vim.opt.termguicolors = false
 
 -- Syntax highlight
+vim.cmd.colorscheme('vim')
 vim.opt.background = 'dark'
 vim.cmd [[
 highlight ColorColumn ctermbg=black
@@ -38,12 +40,13 @@ au TermOpen * tnoremap <Esc> <c-\><c-n>
 au BufEnter * if &buftype == 'terminal' | :startinsert | endif
 au BufEnter * if &buftype == 'terminal' | :startinsert | endif
 autocmd FileType go set tabstop=4|set shiftwidth=4|set noexpandtab
+autocmd FileType typescript,typescriptreact,javascript,javascriptreact set tabstop=2|set shiftwidth=2|set fixeol
 ]]
 
 -- Disable providers and enable custom python
 vim.g.loaded_python_provider = 0        -- Disable python2 support
 vim.g.loaded_perl_provider = 0          -- Disable perl support
-vim.g.python3_host_prog = '~/.pyenv/versions/neovim/bin/python'
+vim.g.python3_host_prog = '~/.config/nvim/.venv/bin/python3'
 
 
 -- My mappings
@@ -54,7 +57,7 @@ vim.api.nvim_set_keymap('n', '<leader>q', '<cmd>q<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<F6>', '<cmd>set list!<Bar>set list?<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<F7>', '<cmd>lua vim.lsp.diagnostic.enable()<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<F8>', '<cmd>lua vim.lsp.diagnostic.disable()<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<F9>', '<cmd>!~/.pyenv/versions/neovim/bin/black %<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<F9>', '<cmd>!~/.config/nvim/.venv/bin/black %<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<leader>h', '<cmd>nohlsearch<CR>', { noremap = true })
 
 -- Move lines up/down with Ctrl+[jk]
@@ -138,7 +141,7 @@ local on_attach = function(client, bufnr)
 end
 
 -- Lsp Servers
-local servers = { 'gopls', 'pyright', 'rust_analyzer', 'tsserver' }
+local servers = { 'gopls', 'rust_analyzer', 'ts_ls', 'pyright' }
 for _, lsp in ipairs(servers) do
   nvim_lsp[lsp].setup {
     on_attach = on_attach,
