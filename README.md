@@ -17,5 +17,6 @@ on first start; the lockfile `lazy-lock.json` lives next to `init.lua`.
 	mkdir -p ~/.config/nvim
 	ln -s "$PWD/init.lua" ~/.config/nvim/init.lua
 
-Python tooling (pynvim, black) is expected in a virtualenv at
-`~/.config/nvim/.venv`.
+Python tooling (pynvim, ruff) is expected in a virtualenv at
+`~/.config/nvim/.venv`. Treesitter parsers are compiled locally and need the
+`tree-sitter` CLI and a C compiler.

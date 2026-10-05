@@ -14,6 +14,7 @@ vim.opt.textwidth = 88                  -- Width of 88 chars per line
 vim.opt.listchars = { eol = '$' }       -- Show $ as end of line in list mode
 vim.opt.formatoptions:append('cqron1')  -- How automatic formating is done
 vim.opt.termguicolors = false
+vim.opt.foldlevelstart = 99               -- Folds exist but start open
 
 -- Syntax highlight
 vim.cmd.colorscheme('vim')
@@ -80,7 +81,13 @@ map('n', '<leader>q', '<cmd>q<CR>')
 map('n', '<F6>', '<cmd>set list! list?<CR>')
 map('n', '<F7>', function() vim.diagnostic.enable() end)
 map('n', '<F8>', function() vim.diagnostic.enable(false) end)
-map('n', '<F9>', '<cmd>!~/.config/nvim/.venv/bin/black %<CR>')
+map('n', '<F9>', function()                           -- ruff fix + format on the saved file
+  local ruff = vim.fn.expand('~/.config/nvim/.venv/bin/ruff')
+  local file = vim.fn.expand('%:p')
+  vim.fn.system({ ruff, 'check', '--fix', '--quiet', file })
+  vim.fn.system({ ruff, 'format', '--quiet', file })
+  vim.cmd.checktime()
+end)
 map('n', '<leader>h', '<cmd>nohlsearch<CR>')
 
 -- Move lines up/down with Ctrl+[jk]
@@ -114,6 +121,54 @@ require('lazy').setup({
   {
     'mbbill/undotree',
     keys = { { '<leader>u', '<cmd>UndotreeToggle<CR>' } },
+  },
+  {
+    'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
+    lazy = false,
+    build = ':TSUpdate',
+    config = function()
+      local langs = {
+        'bash', 'c', 'dockerfile', 'go', 'gomod', 'gosum', 'javascript', 'json',
+        'lua', 'markdown', 'markdown_inline', 'python', 'query', 'regex', 'rust',
+        'toml', 'tsx', 'typescript', 'vim', 'vimdoc', 'yaml',
+      }
+      require('nvim-treesitter').install(langs)
+      -- Highlight, indent and fold with treesitter whenever a parser exists
+      autocmd('FileType', {
+        group = augroup,
+        callback = function(ev)
+          if not pcall(vim.treesitter.start, ev.buf) then return end
+          vim.bo[ev.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          vim.wo.foldmethod = 'expr'
+          vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+        end,
+      })
+    end,
+  },
+  {
+    'nvim-treesitter/nvim-treesitter-textobjects',
+    branch = 'main',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    config = function()
+      require('nvim-treesitter-textobjects').setup {
+        select = { lookahead = true },
+        move = { set_jumps = true },
+      }
+      local select = require('nvim-treesitter-textobjects.select').select_textobject
+      local move = require('nvim-treesitter-textobjects.move')
+      local function sel(q) return function() select(q, 'textobjects') end end
+      map({ 'x', 'o' }, 'af', sel('@function.outer'))
+      map({ 'x', 'o' }, 'if', sel('@function.inner'))
+      map({ 'x', 'o' }, 'ac', sel('@class.outer'))
+      map({ 'x', 'o' }, 'ic', sel('@class.inner'))
+      map({ 'x', 'o' }, 'aa', sel('@parameter.outer'))
+      map({ 'x', 'o' }, 'ia', sel('@parameter.inner'))
+      map({ 'n', 'x', 'o' }, ']f', function() move.goto_next_start('@function.outer', 'textobjects') end)
+      map({ 'n', 'x', 'o' }, '[f', function() move.goto_previous_start('@function.outer', 'textobjects') end)
+      map({ 'n', 'x', 'o' }, ']c', function() move.goto_next_start('@class.outer', 'textobjects') end)
+      map({ 'n', 'x', 'o' }, '[c', function() move.goto_previous_start('@class.outer', 'textobjects') end)
+    end,
   },
   {
     'neovim/nvim-lspconfig',
@@ -171,6 +226,10 @@ autocmd('LspAttach', {
   group = augroup,
   callback = function(ev)
     local opts = { buffer = ev.buf, silent = true }
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client and client.name == 'ruff' then
+      client.server_capabilities.hoverProvider = false  -- pyright does hover
+    end
     vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
     map('n', 'gd', vim.lsp.buf.definition, opts)
     map('n', 'gD', vim.lsp.buf.declaration, opts)
@@ -187,6 +246,9 @@ local servers = {
   gopls = {},
   rust_analyzer = {},
   ts_ls = {},
+  ruff = {
+    cmd = { vim.fn.expand('~/.config/nvim/.venv/bin/ruff'), 'server' },
+  },
   pyright = {
     -- Pyright runs on Node and dies with "Reached heap limit" on big projects
     cmd_env = { NODE_OPTIONS = '--max-old-space-size=4096' },
