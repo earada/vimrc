@@ -2,16 +2,20 @@ VIMRC
 =====
 
 Description
-----------
-This repository contains my personal vimrc configuration and a some syntax files that I used to use:
- * ens.vim 81100 assembler syntax file.
+-----------
+This repository contains my personal Neovim configuration (`init.lua`) and
+some syntax files that I used to use:
+ * ens.vim 88110 assembler syntax file.
  * yar.vim syntax highlighter for yara rules.
 
 Install
 -------
-I recommend to make a symlink to the repository files in order to maintain the
-files update with a simple 'git pull'.
+Symlink `init.lua` into the Neovim config directory. Plugins are managed with
+[lazy.nvim](https://github.com/folke/lazy.nvim) and are installed automatically
+on first start; the lockfile `lazy-lock.json` lives next to `init.lua`.
 
-	ln -s ~/vimrc/vimrc ~/.vimrc
-	ln -s ~/vimrc/ens.vim /usr/share/vim/vim73/syntax/ens.vim
-	ln -s ~/vimrc/ens.vim /usr/share/vim/vim73/syntax/yar.vim
+	mkdir -p ~/.config/nvim
+	ln -s "$PWD/init.lua" ~/.config/nvim/init.lua
+
+Python tooling (pynvim, black) is expected in a virtualenv at
+`~/.config/nvim/.venv`.
