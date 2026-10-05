@@ -1,22 +1,15 @@
--- Vim configuration
-vim.opt.wrap = true                     -- Wrap long lines
-vim.opt.ruler = true                    -- Show the line and column numbers under the cursor
-vim.opt.showcmd = true                  -- Show (partial) command in status line
+-- Options (only the ones that differ from Neovim defaults)
 vim.opt.showmatch = true                -- Show the matching brackets
 vim.opt.mouse = ''                      -- Disable mouse
-vim.opt.hlsearch = true                 -- Highlight all search pattern matches
-vim.opt.incsearch = true                -- Search while typing
 vim.opt.number = true                   -- Show the line numbers
 vim.opt.relativenumber = true           -- Show the numbers relatives to the current line
 vim.opt.scrolloff = 5                   -- Show 5 lines off while scrolling
-vim.opt.sidescrolloff = 5               -- Show 5 columns off  while side-scrolling
-vim.opt.lazyredraw = true               -- Do not redraw screen in the middle of a macro
--- vim.opt.clipboard = 'unnamed'           -- System's clipboard
+vim.opt.sidescrolloff = 5               -- Show 5 columns off while side-scrolling
+-- vim.opt.clipboard = 'unnamed'        -- System's clipboard
 vim.opt.tabstop = 4                     -- A tab is 4 spaces
 vim.opt.softtabstop = 4                 -- Also softabs
 vim.opt.shiftwidth = 4                  -- 4 spaces on indenting
 vim.opt.expandtab = true                -- Expand the tabs
-vim.opt.autoindent = true               -- Always indent
 vim.opt.textwidth = 88                  -- Width of 88 chars per line
 vim.opt.listchars = { eol = '$' }       -- Show $ as end of line in list mode
 vim.opt.formatoptions:append('cqron1')  -- How automatic formating is done
@@ -35,123 +28,197 @@ highlight Pmenu      ctermbg=grey ctermfg=black
 highlight PmenuSel   cterm=bold,reverse ctermbg=black ctermfg=yellow
 highlight PmenuSbar  ctermbg=blue
 highlight PmenuThumb ctermfg=lightblue
-
-au TermOpen * tnoremap <Esc> <c-\><c-n>
-au BufEnter * if &buftype == 'terminal' | :startinsert | endif
-autocmd FileType go set tabstop=4|set shiftwidth=4|set noexpandtab
-autocmd FileType typescript,typescriptreact,javascript,javascriptreact set tabstop=2|set shiftwidth=2|set fixeol
 ]]
+
+-- Autocommands
+local augroup = vim.api.nvim_create_augroup('user', { clear = true })
+local autocmd = vim.api.nvim_create_autocmd
+
+autocmd('TermOpen', {
+  group = augroup,
+  callback = function(ev)
+    vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]], { buffer = ev.buf })
+  end,
+})
+autocmd('BufEnter', {
+  group = augroup,
+  callback = function()
+    if vim.bo.buftype == 'terminal' then vim.cmd.startinsert() end
+  end,
+})
+autocmd('FileType', {
+  group = augroup,
+  pattern = 'go',
+  callback = function()
+    vim.bo.tabstop = 4
+    vim.bo.shiftwidth = 4
+    vim.bo.expandtab = false
+  end,
+})
+autocmd('FileType', {
+  group = augroup,
+  pattern = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact' },
+  callback = function()
+    vim.bo.tabstop = 2
+    vim.bo.shiftwidth = 2
+    vim.bo.fixendofline = true
+  end,
+})
 
 -- Disable providers and enable custom python
 vim.g.loaded_python_provider = 0        -- Disable python2 support
 vim.g.loaded_perl_provider = 0          -- Disable perl support
 vim.g.python3_host_prog = '~/.config/nvim/.venv/bin/python3'
 
-
 -- My mappings
 vim.g.mapleader = ' '
-vim.api.nvim_set_keymap('n', 'Y', 'yy', { noremap = false })  -- Vim default behavior
-vim.api.nvim_set_keymap('n', '<leader>w', '<cmd>w<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<leader>q', '<cmd>q<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<F6>', '<cmd>set list!<Bar>set list?<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<F7>', '<cmd>lua vim.diagnostic.enable()<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<F8>', '<cmd>lua vim.diagnostic.enable(false)<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<F9>', '<cmd>!~/.config/nvim/.venv/bin/black %<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<leader>h', '<cmd>nohlsearch<CR>', { noremap = true })
+local map = vim.keymap.set
+
+map('n', 'Y', 'yy')                                   -- Vim default behavior
+map('n', '<leader>w', '<cmd>w<CR>')
+map('n', '<leader>q', '<cmd>q<CR>')
+map('n', '<F6>', '<cmd>set list! list?<CR>')
+map('n', '<F7>', function() vim.diagnostic.enable() end)
+map('n', '<F8>', function() vim.diagnostic.enable(false) end)
+map('n', '<F9>', '<cmd>!~/.config/nvim/.venv/bin/black %<CR>')
+map('n', '<leader>h', '<cmd>nohlsearch<CR>')
 
 -- Move lines up/down with Ctrl+[jk]
-vim.api.nvim_set_keymap('n', '<C-j>', 'mz:m+<cr>`z', { noremap = true })
-vim.api.nvim_set_keymap('n', '<C-k>', 'mz:m-2<cr>`z', { noremap = true })
-vim.api.nvim_set_keymap('v', '<C-j>', [[:m'>+<cr>`<my`>mzgv`yo`z]], { noremap = true })
-vim.api.nvim_set_keymap('v', '<C-k>', [[:m'<-2<cr>`>my`<mzgv`yo`z]], { noremap = true })
+map('n', '<C-j>', 'mz:m+<CR>`z')
+map('n', '<C-k>', 'mz:m-2<CR>`z')
+map('v', '<C-j>', [[:m'>+<CR>`<my`>mzgv`yo`z]])
+map('v', '<C-k>', [[:m'<-2<CR>`>my`<mzgv`yo`z]])
 
--- Plugins
-local Plug = vim.fn['plug#']
-vim.call('plug#begin', '~/.config/nvim/plugged')
-Plug 'scrooloose/nerdtree'
-Plug 'mbbill/undotree'
-Plug 'neovim/nvim-lspconfig'
-Plug 'nvim-lua/plenary.nvim'
-Plug 'nvim-telescope/telescope.nvim'
-Plug 'nvim-telescope/telescope-fzy-native.nvim'
-vim.call('plug#end')
+-- Plugins (lazy.nvim)
+local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+  vim.fn.system({
+    'git', 'clone', '--filter=blob:none', '--branch=stable',
+    'https://github.com/folke/lazy.nvim.git', lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
 
--- Plugins mappings
-vim.api.nvim_set_keymap('n', '<C-n>', '<cmd>NERDTreeToggle<CR><C-w>=', { noremap = true })
-vim.api.nvim_set_keymap('n', '<leader>u', '<cmd>UndotreeToggle<CR>', { noremap = true })
+-- Keep the lockfile next to the real init.lua (this file may be a symlink)
+local config_dir = vim.fn.fnamemodify(vim.fn.resolve(vim.env.MYVIMRC), ':h')
 
--- telescope
-require('telescope').setup{
-  defaults = {
-    mappings = {
-      i = {
-        ["<C-k>"] = "move_selection_previous",
-        ["<C-j>"] = "move_selection_next",
-        ["<C-h>"] = "which_key"
-      }
-    },
-    layout_config = {
-      horizontal = { width = 0.9 }
-    },
-    path_display = { truncate = 1 }
+local function builtin(picker)
+  return function() require('telescope.builtin')[picker]() end
+end
+
+require('lazy').setup({
+  {
+    'preservim/nerdtree',
+    keys = { { '<C-n>', '<cmd>NERDTreeToggle<CR><C-w>=' } },
   },
-  pickers = {},
-  extensions = {}
+  {
+    'mbbill/undotree',
+    keys = { { '<leader>u', '<cmd>UndotreeToggle<CR>' } },
+  },
+  {
+    'neovim/nvim-lspconfig',
+    -- Newer versions nag on every start under Neovim 0.10; unpin on 0.11+
+    commit = vim.fn.has('nvim-0.11') == 0 and '32b6a64' or nil,
+  },
+  {
+    'nvim-telescope/telescope.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope-fzy-native.nvim',
+    },
+    config = function()
+      require('telescope').setup {
+        defaults = {
+          mappings = {
+            i = {
+              ['<C-k>'] = 'move_selection_previous',
+              ['<C-j>'] = 'move_selection_next',
+              ['<C-h>'] = 'which_key',
+            },
+          },
+          layout_config = {
+            horizontal = { width = 0.9 },
+          },
+          path_display = { truncate = 1 },
+        },
+      }
+      require('telescope').load_extension('fzy_native')
+      -- Fix nvim 0.8.0 background color issue
+      vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = '#FFFFFF' })
+    end,
+    keys = {
+      { '<leader>ff', builtin('find_files') },
+      { '<leader>fg', builtin('live_grep') },
+      { '<leader>fs', builtin('grep_string') },
+      { '<leader>fb', builtin('buffers') },
+      { '<leader>fh', builtin('help_tags') },
+      { '<leader>gl', builtin('git_commits') },
+      { '<leader>gr', builtin('git_bcommits') },
+      { '<leader>gc', builtin('git_branches') },
+      { '<leader>gB', builtin('git_status') },
+    },
+  },
+}, {
+  lockfile = config_dir .. '/lazy-lock.json',
+  rocks = { enabled = false },
+  change_detection = { notify = false },
+})
+
+-- LSP
+-- Buffer-local mappings, applied whenever a server attaches.
+-- Neovim already provides [d / ]d for diagnostics and K for hover.
+autocmd('LspAttach', {
+  group = augroup,
+  callback = function(ev)
+    local opts = { buffer = ev.buf, silent = true }
+    vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
+    map('n', 'gd', vim.lsp.buf.definition, opts)
+    map('n', 'gD', vim.lsp.buf.declaration, opts)
+    map('n', 'gk', vim.lsp.buf.hover, opts)
+    map('n', 'gi', vim.lsp.buf.implementation, opts)
+    map('n', 'ge', vim.diagnostic.open_float, opts)
+    map('n', 'gr', builtin('lsp_references'), opts)
+    map('n', 'g<space>', vim.lsp.buf.format, opts)
+    map('n', '<leader>rn', vim.lsp.buf.rename, opts)
+  end,
+})
+
+local servers = {
+  gopls = {},
+  rust_analyzer = {},
+  ts_ls = {},
+  pyright = {
+    -- Pyright runs on Node and dies with "Reached heap limit" on big projects
+    cmd_env = { NODE_OPTIONS = '--max-old-space-size=4096' },
+    -- Safety net when the project has no pyrightconfig.json of its own
+    settings = {
+      python = {
+        analysis = {
+          diagnosticMode = 'openFilesOnly',
+          exclude = {
+            '**/node_modules', '**/__pycache__', '**/.venv', '**/venv',
+            '**/build', '**/dist',
+          },
+        },
+      },
+    },
+  },
 }
-require('telescope').load_extension('fzy_native')
 
--- Fix nvim 0.8.0 background color issue
-vim.api.nvim_set_hl(0, "TelescopeNormal", {bg="#FFFFFF"})
-
-vim.api.nvim_set_keymap('n', '<leader>ff', [[<cmd>lua require('telescope.builtin').find_files()<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>fg', [[<cmd>lua require('telescope.builtin').live_grep()<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>fs', [[<cmd>lua require('telescope.builtin').grep_string()<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>fb', [[<cmd>lua require('telescope.builtin').buffers()<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>fh', [[<cmd>lua require('telescope.builtin').help_tags()<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>gl', [[<cmd>lua require('telescope.builtin').git_commits()<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>gr', [[<cmd>lua require('telescope.builtin').git_bcommits()<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>gc', [[<cmd>lua require('telescope.builtin').git_branches()<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>gB', [[<cmd>lua require('telescope.builtin').git_status()<cr>]], { noremap = true, silent = true })
-
--- LspConfig
-local nvim_lsp = require('lspconfig')
-
-local on_attach = function(client, bufnr)
-  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-
-  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
-
-  -- Mappings.
-  local opts = { noremap=true, silent=true }
-
-  -- See `:help vim.lsp.*` for documentation on any of the below functions
-  buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-  buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-  --buf_set_keymap('n', 'gT', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  buf_set_keymap('n', 'gk', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  buf_set_keymap('n', 'ge', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
-  buf_set_keymap('n', 'gr', '<cmd>lua require("telescope.builtin").lsp_references()<CR>', opts)
-  buf_set_keymap('n', 'g<space>', '<cmd>lua vim.lsp.buf.format()<CR>', opts)
-  buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  buf_set_keymap('n', '<space>p', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
-  buf_set_keymap('n', '<space>n', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+for _, cfg in pairs(servers) do
+  cfg.flags = { debounce_text_changes = 150 }
 end
 
--- Lsp Servers
-local servers = { 'gopls', 'rust_analyzer', 'ts_ls' }
-for _, lsp in ipairs(servers) do
-  nvim_lsp[lsp].setup {
-    on_attach = on_attach,
-    flags = {
-      debounce_text_changes = 150,
-    }
-  }
+if vim.lsp.config then
+  -- Neovim >= 0.11: native config, nvim-lspconfig only provides the defaults
+  for name, cfg in pairs(servers) do
+    vim.lsp.config(name, cfg)
+  end
+  vim.lsp.enable(vim.tbl_keys(servers))
+else
+  -- Neovim 0.10
+  local lspconfig = require('lspconfig')
+  for name, cfg in pairs(servers) do
+    lspconfig[name].setup(cfg)
+  end
 end
--- Pyright runs on Node and dies with "Reached heap limit" on big projects
-nvim_lsp.pyright.setup {
-  on_attach = on_attach,
-  flags = { debounce_text_changes = 150 },
-  cmd_env = { NODE_OPTIONS = '--max-old-space-size=4096' },
-}
