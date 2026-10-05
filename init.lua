@@ -198,8 +198,6 @@ require('lazy').setup({
         },
       }
       require('telescope').load_extension('fzy_native')
-      -- Fix nvim 0.8.0 background color issue
-      vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = '#FFFFFF' })
     end,
     keys = {
       { '<leader>ff', builtin('find_files') },
