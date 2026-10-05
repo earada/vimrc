@@ -38,7 +38,6 @@ highlight PmenuThumb ctermfg=lightblue
 
 au TermOpen * tnoremap <Esc> <c-\><c-n>
 au BufEnter * if &buftype == 'terminal' | :startinsert | endif
-au BufEnter * if &buftype == 'terminal' | :startinsert | endif
 autocmd FileType go set tabstop=4|set shiftwidth=4|set noexpandtab
 autocmd FileType typescript,typescriptreact,javascript,javascriptreact set tabstop=2|set shiftwidth=2|set fixeol
 ]]
@@ -55,8 +54,8 @@ vim.api.nvim_set_keymap('n', 'Y', 'yy', { noremap = false })  -- Vim default beh
 vim.api.nvim_set_keymap('n', '<leader>w', '<cmd>w<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<leader>q', '<cmd>q<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<F6>', '<cmd>set list!<Bar>set list?<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<F7>', '<cmd>lua vim.lsp.diagnostic.enable()<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<F8>', '<cmd>lua vim.lsp.diagnostic.disable()<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<F7>', '<cmd>lua vim.diagnostic.enable()<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<F8>', '<cmd>lua vim.diagnostic.enable(false)<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<F9>', '<cmd>!~/.config/nvim/.venv/bin/black %<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<leader>h', '<cmd>nohlsearch<CR>', { noremap = true })
 
@@ -112,7 +111,7 @@ vim.api.nvim_set_keymap('n', '<leader>fh', [[<cmd>lua require('telescope.builtin
 vim.api.nvim_set_keymap('n', '<leader>gl', [[<cmd>lua require('telescope.builtin').git_commits()<cr>]], { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>gr', [[<cmd>lua require('telescope.builtin').git_bcommits()<cr>]], { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>gc', [[<cmd>lua require('telescope.builtin').git_branches()<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<leader>gB', [[<cmd>lua require('telescope.builtin').help_tags()<cr>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>gB', [[<cmd>lua require('telescope.builtin').git_status()<cr>]], { noremap = true, silent = true })
 
 -- LspConfig
 local nvim_lsp = require('lspconfig')
@@ -141,7 +140,7 @@ local on_attach = function(client, bufnr)
 end
 
 -- Lsp Servers
-local servers = { 'gopls', 'rust_analyzer', 'ts_ls', 'pyright' }
+local servers = { 'gopls', 'rust_analyzer', 'ts_ls' }
 for _, lsp in ipairs(servers) do
   nvim_lsp[lsp].setup {
     on_attach = on_attach,
@@ -150,3 +149,9 @@ for _, lsp in ipairs(servers) do
     }
   }
 end
+-- Pyright runs on Node and dies with "Reached heap limit" on big projects
+nvim_lsp.pyright.setup {
+  on_attach = on_attach,
+  flags = { debounce_text_changes = 150 },
+  cmd_env = { NODE_OPTIONS = '--max-old-space-size=4096' },
+}
