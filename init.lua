@@ -166,7 +166,7 @@ require('lazy').setup({
 
 -- LSP
 -- Buffer-local mappings, applied whenever a server attaches.
--- Neovim already provides [d / ]d for diagnostics and K for hover.
+-- Neovim already provides [d / ]d for diagnostics, K for hover and the gr* family.
 autocmd('LspAttach', {
   group = augroup,
   callback = function(ev)
@@ -177,7 +177,7 @@ autocmd('LspAttach', {
     map('n', 'gk', vim.lsp.buf.hover, opts)
     map('n', 'gi', vim.lsp.buf.implementation, opts)
     map('n', 'ge', vim.diagnostic.open_float, opts)
-    map('n', 'gr', builtin('lsp_references'), opts)
+    map('n', 'grr', builtin('lsp_references'), opts)  -- same key as the 0.11+ default, via Telescope
     map('n', 'g<space>', vim.lsp.buf.format, opts)
     map('n', '<leader>rn', vim.lsp.buf.rename, opts)
   end,
